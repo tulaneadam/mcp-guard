@@ -1,0 +1,50 @@
+name: "mcp-guard"
+description: "Scan MCP configs and tool definitions for tool poisoning, leaked secrets and risky servers; upload SARIF to code scanning."
+author: "Adam Goldfine"
+branding:
+  icon: "shield"
+  color: "gray-dark"
+inputs:
+  paths:
+    description: "Space-separated config files, tools/list dumps or directories to scan."
+    required: false
+    default: "."
+  fail-on:
+    description: "Fail the job when a finding is at or above this severity (info|low|medium|high|critical)."
+    required: false
+    default: "high"
+  upload-sarif:
+    description: "Upload results to GitHub code scanning."
+    required: false
+    default: "true"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install mcp-guard
+      shell: bash
+      run: pip install "${{ github.action_path }}"
+    - name: Scan
+      id: scan
+      shell: bash
+      run: |
+        set +e
+        existing=""
+        for p in ${{ inputs.paths }}; do [ -e "$p" ] && existing="$existing $p"; done
+        if [ -z "$existing" ]; then echo "No MCP files found to scan."; exit 0; fi
+        mcp-guard scan $existing --format sarif -o mcp-guard.sarif --fail-on "${{ inputs.fail-on }}"
+        echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+    - name: Upload SARIF
+      if: ${{ inputs.upload-sarif == 'true' && hashFiles('mcp-guard.sarif') != '' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: mcp-guard.sarif
+        category: mcp-guard
+    - name: Enforce threshold
+      if: ${{ steps.scan.outputs.exit_code == '1' }}
+      shell: bash
+      run: |
+        echo "mcp-guard found issues at or above '${{ inputs.fail-on }}'."
+        exit 1

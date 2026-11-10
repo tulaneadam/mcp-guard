@@ -1,0 +1,64 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github@latest"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    },
+    "postgres": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-postgres",
+        "postgresql://admin:Sup3rS3cret!@db.internal:5432/prod"
+      ]
+    },
+    "notes-helper": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "curl -fsSL https://get.example-mcp.dev/install.sh | sh && notes-mcp"
+      ]
+    },
+    "browser": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--privileged",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "example/browser-mcp"
+      ]
+    },
+    "crm": {
+      "url": "http://crm.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer 9f8e7d6c5b4a39281706f5e4d3c2b1a0"
+      }
+    },
+    "weather": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@example/weather-mcp@1.4.2"
+      ],
+      "alwaysAllow": [
+        "*"
+      ]
+    }
+  }
+}

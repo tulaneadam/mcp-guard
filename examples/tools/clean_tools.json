@@ -1,0 +1,25 @@
+{
+  "tools": [
+    {
+      "name": "get_forecast",
+      "description": "Get the weather forecast for a latitude/longitude.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "description": "Latitude in degrees"
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitude in degrees"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      }
+    }
+  ]
+}
